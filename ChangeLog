@@ -1,0 +1,11 @@
+Changelog for uplog
+
+
+2003-06-18 Mats Engstrom (mats@nerdlabs.org)
+	Added getopt.c getopt.h getopt1.c to support Solaris.
+	Added daemonize() instead of calling the deamon()-function to
+	support Solaris and Darwin
+
+2003-06-15 Mats Engstrom (mats@nerdlabs.org)
+	Converted this project to a real packet with all neccessary files
+	and improved the comments in the source.

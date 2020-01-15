@@ -1,0 +1,5 @@
+
+ADD:
+ * Allow for muliple hosts to be checked from the same process when in
+   daemon mode (using multiple logfiles)
+

@@ -1,0 +1,91 @@
+Uplog - An UDP based ping program with an "ASCII-graphical" log file
+
+
+DESCRIPTION
+===========
+
+Uplog is an UDP based ping program that gives an ASCII-graphical log
+of the packet losses.
+
+Once a second uplog sends a packet to the echo port (7) of the target host 
+and waits for a reply.  If it gets a reply a X is written, otherwise a dot
+(.) is written to the log file.  If a packet with a wrong sequence number 
+arrives a colon (:) is written to the log file.
+
+By examining the log file one can easily see when and how the packet losses
+occur.  For instance the pattern below with 5 second sections of total
+packet loss suggests that there's some kind of routing problem caused by
+routing flaps.
+
+2003-06-13 08:47 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+2003-06-13 08:48 XXXXXXXXXXXXXXXXXXXXXXXXX.....XXXXX.....XXXXXXXXXXXXXXXXXXXX
+2003-06-13 08:49 XXXXXXX.....XXXXX.....XXXXX...XXXXXXX.....XXXXXXXXXXXXXX....
+2003-06-13 08:50 .XXXXX.....XXXXXXXXXXXXXXXXXXXXXXXXXXX.....XXXXX.....XXXXX..
+2003-06-13 08:51 ...XXXXXXXXXXXXXXXXXX.....XXXXX.....XXXXXXXXXXXXXX......XXXX
+2003-06-13 08:52 X.....XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+2003-06-13 08:53 XXXXXXXXXXXXXXXXXXXXXXXXXX....XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+Or just that the network is slightly overloaded during peak hours as below.
+
+2003-06-09 14:00 XXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+2003-06-09 14:01 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+2003-06-09 14:02 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+2003-06-09 14:03 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXX
+2003-06-09 14:04 XXXXXXXXXXXXXXXXXX.XXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+2003-06-09 14:05 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXX
+2003-06-09 14:06 XXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+2003-06-09 14:07 XXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+I'm currentlyy using uplog on one a Debian 3.0/i386 and a Slackware 8.1/i386 
+box. I've got a report that it works on Solaris also. Other distributions are 
+untested but should probably work just fine.
+
+Please send me a mail if you get uplog up and running on one of your
+machines if the platform/OS is not listed here.  
+
+COMPILE/INSTALL
+===============
+
+Please read the INSTALL file for compile / installation issues.
+
+
+RUNNING
+=======
+
+To run uplog simply give a host as the argument to uplog. The host name can
+either be given as a fqdn (www.nerdlabs.org) or as a dotted quad
+(195.66.47.97).
+
+   uplog 195.66.47.97
+
+Uplog will by default run in the background as a daemon and write the log
+file to the current directory.  If you want to have the log file in another
+location the location can be specified with the -l option.
+
+   uplog -l /var/log/uplog/ 195.66.47.97
+
+By using the -f option uplog runs in the foreground instead and writes the
+log to stdout.
+
+   uplog -f 195.66.47.97
+
+The port to send the UDP packets to can be changed with the -p option.
+
+   uplog -p 13 195.66.47.97
+
+To terminate uplog when running as a daemon send a SIGHUP to it using the
+kill command. You need to look up the pid of the program with ps first.
+
+When running as a daemon all error messages are send to syslog using LOCAL7
+as the facility.
+
+Since this is the first public release I'd appreciate it very much is you
+could send me a mail if you get uplog up and running on one of your
+machines.  I'm using uplog on one Debian 3.0 and one Slackware 8.1 box,
+all other distributions are untested but should work.
+
+CONTACT
+=======
+
+Any patches, suggestions, bug reports, attaboys,  bug fixes, ideas and other 
+stuff are welcome. Please mail me at mats@nerdlabs.org.

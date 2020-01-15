@@ -1,0 +1,41 @@
+AC_INIT(uplog.c)
+AM_INIT_AUTOMAKE(uplog,0.2)
+AM_CONFIG_HEADER(config.h)
+
+# Checks for programs.
+AC_PROG_CC
+
+# Checks for libraries.
+AC_HEADER_STDC
+
+# Checks for header files.
+AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h stdlib.h string.h strings.h sys/socket.h sys/time.h syslog.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_TIME
+AC_STRUCT_TM
+AC_TYPE_SIGNAL
+
+# Checks for library functions.
+AC_FUNC_STRFTIME
+AC_CHECK_FUNCS([bzero gethostbyname select socket strtol])
+
+
+dnl Check for socket and select even if networking gets manually
+dnl disabled below, since select is used if available for
+dnl millisecond sleeping
+AC_SEARCH_LIBS(socket,socket)
+AC_SEARCH_LIBS(gethostbyname,nsl socket)
+AC_CHECK_FUNCS(socket gethostbyname select)
+if test "$ac_cv_func_select" = "yes" ; then
+   if test "$ac_cv_func_socket" = "yes" ; then
+      if test "$ac_cv_func_gethostbyname" = "yes" ; then
+         network="yes"
+      fi
+   fi
+fi
+
+
+
+AC_PROG_INSTALL
+AC_OUTPUT(Makefile)
