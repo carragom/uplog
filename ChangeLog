@@ -1,5 +1,7 @@
 Changelog for uplog
 
+2008-01-09 Mats Engstrom (mats.engstrom@gmail.com)
+	Added support for changing packet size
 
 2003-06-18 Mats Engstrom (mats@nerdlabs.org)
 	Added getopt.c getopt.h getopt1.c to support Solaris.

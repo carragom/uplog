@@ -1,5 +1,6 @@
 /*
-    Copyright (c) 2003 by Mats Engstrom, Nerdlabs Consulting (mats@nerdlabs.org)
+    Copyright (c) 2003,2008 by Mats Engstrom, Nerdlabs Consulting 
+    (mats.engstrom@gmail.com)
 
     Uplog is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,6 +58,13 @@
 
 #define TRUE	1
 #define FALSE	0
+
+// Define the struct to hold the requests and replies
+typedef struct {
+  unsigned int 	counter;
+  char 		data[998];
+} udpbuffer_t;
+
 
 
 // Used as a flag to terminate the program by a SIGHUP
@@ -160,9 +168,10 @@ void usage(void) {
   printf("  -h          Show this help\n");
   printf("  -V          Show program version\n");
   printf("  -f          Run program in foreground, print to stdout\n");
+  printf("  -s SIZE     Change packed size (2-1000), defaults to 2)\n");
   printf("  -p PORT     Send packets to PORT, default is 7\n");
   printf("  -l LOGDIR   Write logs in LOGDIR, default it current dir\n");
-  printf("\n Please report bugs to mats@nerdlabs.org\n");
+  printf("\n Please report bugs to mats.engstrom@gmail.com\n");
 }
                                                  
 
@@ -198,8 +207,9 @@ int main(int argc, char *argv[]) {
   char		host[256];	// The host to send packets to
   int		port;		// The port to send packets to
   int		result;		// Generic function-result variable
-  unsigned int	request;	// The data to send()
-  unsigned int	reply;		// To read() the reply into
+  int		packetsize;
+  udpbuffer_t	request;	// The data to send()
+  udpbuffer_t	reply;		// To read() the reply into
   char		datastring[100]; // Collects the result for one minute
   FILE		*f;		// Used for the log file
   struct timeval tv;		// Convert time to ascii	
@@ -212,18 +222,18 @@ int main(int argc, char *argv[]) {
   char		tmpstring[256]; // Temp string for building error messages in
   int		c;		// Used when parsing command line options
 
-
   // Initialize variables that can be modified by the command line options
   
   abort_flag=FALSE;
   daemon_flag=TRUE;
   strcpy(logpath,"./");
   port=DEFAULT_PORT;
+  packetsize = sizeof(unsigned int);
 
   
   //  Parse the command line options
   
-  while ((c = getopt(argc, argv, "hVfl:p:")) != -1) {
+  while ((c = getopt(argc, argv, "hVfl:p:s:")) != -1) {
     switch (c) {
 
       case 'h':
@@ -246,6 +256,12 @@ int main(int argc, char *argv[]) {
 
       case 'p':
         port=strtol(optarg,NULL,10);
+        break;
+
+      case 's':
+        packetsize=strtol(optarg,NULL,10);
+        if (packetsize<sizeof(unsigned int)) packetsize=sizeof(unsigned int);
+        if (packetsize>sizeof(udpbuffer_t)) packetsize=sizeof(udpbuffer_t);
         break;
         
       default:
@@ -314,7 +330,10 @@ int main(int argc, char *argv[]) {
   // Copy the date and time to the data collection string and 
   // initialize the request value to be sent
 
-  request=0;
+  request.counter=0x1234;
+  strncpy(request.data, "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec at ligula. Mauris vehicula magna vitae purus. Mauris sit amet lacus vel purus dignissim suscipit. Proin ultricies sagittis nisl. Fusce lorem purus, ultricies a, aliquet vitae, consectetuer quis, libero. Nunc hendrerit nisl ac velit. Integer sollicitudin arcu pharetra sapien. Phasellus tellus elit, blandit sed, volutpat a, consequat eget, urna. Suspendisse potenti. Nam tincidunt diam in est. Ut volutpat elementum libero. Etiam odio odio, aliquet non, commodo varius, scelerisque in, ante. Duis scelerisque urna sit amet justo. Donec sollicitudin massa at quam. Nam porta. Cras a orci. Integer eget diam. Suspendisse et tellus nec nulla viverra pellentesque. Integer at augue id elit elementum auctor. Nullam et dui nec orci commodo condimentum. Cras ligula leo, pellentesque id, fringilla at, pharetra at, libero. Quisque commodo justo a felis. Fusce in nulla sed tortor nonummy facilisis. In a metus. Nunc varius enim. In hac ame.", 998);
+
+
   GetTime(datastring,sizeof(datastring));
   strcat(datastring," ");
   if (!daemon_flag) {
@@ -364,8 +383,8 @@ int main(int argc, char *argv[]) {
 
     // Increment the request number and send the UDP-packet 
   
-    request++;
-    result=write(sck,&request,sizeof(request));
+    request.counter++;
+    result=write(sck,&request,packetsize);
 
     // Wait for the reply to come back from the destination
   
@@ -381,8 +400,8 @@ int main(int argc, char *argv[]) {
       resultchar=TIMEOUT_CHAR;
     } else {
       // Check if we got back the value we sent
-      result=read(sck,&reply,sizeof(reply));
-      if (reply==request) {
+      result=read(sck,&reply,packetsize);
+      if (reply.counter==request.counter) {
         resultchar=REPLY_CHAR;
       } else {
         resultchar=INVALID_CHAR;
